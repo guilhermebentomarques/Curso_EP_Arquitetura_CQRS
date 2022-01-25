@@ -1,0 +1,94 @@
+﻿@model IEnumerable<Cadastro.QueryStack.Models.AlunoEndereco>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Nome)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CPF)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Email)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nome)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CPF)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.ActionLink("Editar", "Edit", new {id = item.AlunoId}, new { @class = "btn btn-primary" }) |
+                <button type="button" class="btn btn-info viewbutton" data-id="@item.AlunoId" data-toggle="modal" data-target="#viewBooking">
+                    Histórico
+                </button>
+            </td>
+        </tr>
+    }
+
+</table>
+
+<div class="modal fade" id="viewBooking">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Histórico do Cadastro do Aluno</h4>
+            </div>
+            <div class="modal-body">
+                <p id="history"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        $(".viewbutton").on("click", function() {
+            var bookingId = $(this).data('id');
+
+            $.ajax({
+                url: "http://localhost:18574/alunos/AlunoHistory/" + bookingId,
+                cache: false
+            }).done(function(data) {
+                var html = "<table class='table'>";
+                html += "<thead><th>Ação</th><th>Quando</th><th>AlunoId</th><th>Nome</th><th>E-mail</th><th>CPF</th></thead>";
+                for (var i = 0; i < data.Modificacoes.length; i++) {
+                    var change = data.Modificacoes[i];
+                    html += "<tr>";
+                    html += "<td>" + change.Action + "</td>";
+                    html += "<td>" + change.When + "</td>";
+                    html += "<td>" + change.AlunoId + "</td>";
+                    html += "<td>" + change.Nome + "</td>";
+                    html += "<td>" + change.Email + "</td>";
+                    html += "<td>" + change.CPF + "</td>";
+                    html += "</tr>";
+                }
+                html += "</table>";
+                $("#history").html(html);
+            });
+        });
+    </script>
+}
